@@ -11,13 +11,31 @@ export interface WebhookConfig {
   template?: string;
 }
 
+function getCustomTimezoneISO(date, timeZone) {
+    // 使用瑞典语格式化，它会返回类似 "2026-06-15 09:38:24" 的字符串
+    const formattedString = date.toLocaleString('sv-SE', { 
+        timeZone: timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    
+    // 将中间的空格替换为 'T'
+    return formattedString.replace(' ', 'T');
+}
+
+
 export async function sendWebhook(
   config: WebhookConfig,
   title: string,
   body: string,
 ): Promise<SendResult> {
   if (!config.url) return { ok: false, detail: "Missing webhook URL" };
-  const timestamp = new Date().toISOString();
+  const now = new Date();
+  const timestamp = getCustomTimezoneISO(now, 'Asia/Shanghai')
   let payload: string;
   if (config.template) {
     payload = config.template
